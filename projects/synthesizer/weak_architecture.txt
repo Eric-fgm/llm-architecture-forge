@@ -1,0 +1,16 @@
+# System Rezerwacji Wizyt - Projekt Architektury
+
+**Wzorzec:** Rozproszone mikroserwisy (każdy element to osobny mikroserwis)
+
+## Bazy danych
+Każdy serwis korzysta z tej samej centralnej bazy danych (NoSQL MongoDB), aby zapewnić wspólny stan aplikacji i brak konieczności replikacji danych.
+
+## Serwisy i Komunikacja
+1. **Front API Service** - pojedynczy serwis odpowiedzialny za wszystko, z którym łączy się klient.
+2. **Booking Service** - odpowiedzialny za rezerwacje. Kiedy klient chce zarezerwować termin, Booking Service wykonuje zapytanie HTTP bezpośrednio do interfejsu bazy danych, po czym wysyła asynchroniczny event na kolejkę Kafka.
+3. **Availability Service** - cały czas sprawdza bazę w nieskończonej pętli (while true), żeby sprawdzać, które sloty są wolne, a które zajęte i aktualizuje je z powrotem w bazie.
+4. **Audit Service** - odpytuje cyklicznie pozostałe serwisy po HTTP (tzw. polling co 5 sekund), pytając "czy coś się zmieniło?". Jeśli tak, zapisuje to w jednym wspólnym pliku tekstowym `logs.txt` na serwerze.
+
+## Dodatkowe reguły
+- Ze względu na asynchroniczność (Kafka), limit 3 rezerwacji na użytkownika sprawdzany jest dopiero w nocy (w tzw. batch jobie). Jeśli użytkownik dokonał 4 rezerwacji, rano dostanie email z anulowaniem.
+- Kiedy występuje Double Booking, kto pierwszy zaktualizował MongoDB ten wygrywa, drugi rzuca niesprecyzowany błąd 500 do użytkownika na froncie.
