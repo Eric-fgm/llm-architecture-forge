@@ -1,7 +1,7 @@
 """prompt_chain — A simple library for LLM prompt chaining."""
 
 from prompt_chain.chain import PromptChain
-from prompt_chain.client import GeminiClient, LLMClient, OpenAIClient
+from prompt_chain.client import ClaudeClient, GeminiClient, LLMClient, OpenAIClient
 from prompt_chain.models import ChainResult, ChainStep, LLMPayload, LLMResponse
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     "LLMResponse",
     "LLMPayload",
     "LLMClient",
+    "ClaudeClient",
     "GeminiClient",
     "OpenAIClient",
 ]

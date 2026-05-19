@@ -1,9 +1,10 @@
 import os
-import sys
+
 from dotenv import load_dotenv
 from prompt_chain import GeminiClient, PromptChain
 
-def main():
+
+def main() -> None:
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key or api_key == "YOUR_GEMINI_API_KEY":
@@ -11,12 +12,16 @@ def main():
         return
 
     # Krok 1: Wczytanie "celowo słabej architektury"
-    input_file = "weak_architecture.txt"
-    if not os.path.exists(input_file):
-        print(f"Błąd: Brak pliku {input_file}. Utwórz ten plik i wklej do niego słabą architekturę.")
+    print("Podaj ścieżke do słabej architektury:")
+    weak_arch_path = input()
+
+    if not os.path.exists(weak_arch_path):
+        print(
+            f"Błąd: Brak pliku {weak_arch_path}. Utwórz ten plik i wklej do niego słabą architekturę."
+        )
         return
 
-    with open(input_file, "r", encoding="utf-8") as f:
+    with open(weak_arch_path, "r", encoding="utf-8") as f:
         weak_arch_text = f.read()
 
     client = GeminiClient(api_key=api_key, model="gemini-2.5-flash")
@@ -31,19 +36,20 @@ def main():
             "2. Zaproponuj konkretne ulepszenia i poprawki dla każdego z problemów.\n\n"
             "Projekt architektury do analizy:\n{architecture}"
         ),
-        output_key="critique_output"
+        output_key="critique_output",
     )
 
     print("Analizowanie architektury...")
     result = chain.run({"architecture": weak_arch_text})
 
     # Zapis do pliku
-    output_file = "critique_output.md"
+    output_file = "output/critique_output.md"
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("# Krytyka i Ulepszenia Architektury (Zadanie A3)\n\n")
         f.write(result.outputs["critique_output"])
 
     print(f"\nGotowe! Wynik analizy został zapisany w {output_file}")
+
 
 if __name__ == "__main__":
     main()
